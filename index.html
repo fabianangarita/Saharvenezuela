@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="es"><head><meta charset="utf-8"><title>SAHAR VENEZUELA · Perfumería</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Perfumes de diseñador, nicho y árabes. Pedidos por WhatsApp.">
+<style>
+:root{--bg:#fff;--card:#f4f4f4;--line:#d9d9d9;--mid:#777;--ink:#171717;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme=light]){--bg:#171717;--card:#222;--line:#444;--mid:#aaa;--ink:#fff}}
+*{box-sizing:border-box}html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 system-ui,sans-serif}
+.serif,h1,h2,h3{font-family:Georgia,'Times New Roman',serif;font-weight:400}
+header{position:sticky;top:env(safe-area-inset-top,0px);background:var(--bg);border-bottom:1px solid var(--line);z-index:5;display:flex;align-items:center;justify-content:space-between;padding:10px 16px}
+.logo{text-align:center;line-height:1;cursor:pointer}.logo b{font:400 24px Georgia,serif;letter-spacing:.3em}.logo small{display:block;font-size:9px;letter-spacing:.5em;color:var(--mid);margin-top:4px}
+nav{display:flex;gap:14px;font-size:13px;letter-spacing:.08em;text-transform:uppercase}nav a{cursor:pointer;color:var(--ink);text-decoration:none}
+@media(max-width:700px){nav{display:none;position:absolute;top:100%;left:0;right:0;background:var(--bg);flex-direction:column;padding:16px;border-bottom:1px solid var(--line)}nav.open{display:flex}}
+@media(min-width:701px){#mb{display:none}}
+button,.btn{font:inherit;border:1px solid var(--ink);background:var(--ink);color:var(--bg);padding:12px 18px;cursor:pointer;letter-spacing:.08em;font-size:13px;text-transform:uppercase;min-height:44px}
+.ghost{background:transparent;color:var(--ink)}.ico{background:none;border:0;color:var(--ink);font-size:20px;padding:6px;min-height:0}
+main{max-width:1100px;margin:auto;padding:16px}
+.hero{text-align:center;padding:56px 12px;background:var(--card);margin-bottom:24px}.hero h1{font-size:clamp(26px,6vw,46px);letter-spacing:.1em;margin:0 0 12px}.hero p{color:var(--mid);margin:0 0 24px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:14px}
+.card{border:1px solid var(--line);cursor:pointer;background:var(--bg)}.card .im{aspect-ratio:1;background:var(--card);display:flex;align-items:center;justify-content:center;color:var(--mid);overflow:hidden}.card img,.det img{width:100%;height:100%;object-fit:cover}.card div.t{padding:10px}.card small{color:var(--mid);text-transform:uppercase;letter-spacing:.1em;font-size:11px}
+s{color:var(--mid)}.off{font-size:11px;background:var(--ink);color:var(--bg);padding:2px 6px}
+.bar{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}input,select,textarea{font:inherit;padding:10px;border:1px solid var(--line);background:var(--bg);color:var(--ink);width:100%;min-height:44px}.bar input,.bar select{width:auto;flex:1;min-width:130px}
+.det{display:grid;gap:24px}@media(min-width:700px){.det{grid-template-columns:1fr 1fr}}.det .im{aspect-ratio:1;background:var(--card)}
+.notes{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin:16px 0}.notes div{background:var(--card);padding:12px}.notes b{display:block;font-size:11px;letter-spacing:.15em;text-transform:uppercase;color:var(--mid)}
+table{width:100%;border-collapse:collapse}td,th{padding:8px;border-bottom:1px solid var(--line);text-align:left;font-size:14px}
+.row{display:flex;gap:8px;align-items:center;justify-content:space-between}
+.form{display:grid;gap:10px;background:var(--card);padding:14px;margin:12px 0}.form label{font-size:12px;color:var(--mid)}
+footer{border-top:1px solid var(--line);text-align:center;padding:32px 16px;color:var(--mid);font-size:13px}
+.wa{background:#171717;border-color:#171717;color:#fff}.msg{padding:40px;text-align:center;color:var(--mid)}
+.tabs{display:flex;gap:8px;margin-bottom:12px}.tabs button{flex:1}
+</style></head><body>
+<header><button class="ico" id="mb" aria-label="Menú">☰</button>
+<nav id="nav"><a data-r="">Inicio</a><a data-r="catalogo">Catálogo</a><a data-r="hombre">Hombre</a><a data-r="mujer">Mujer</a><a data-r="unisex">Unisex</a><a data-r="ofertas">Ofertas</a><a data-r="contacto">Contacto</a></nav>
+<div class="logo" data-r=""><b id="brand">SAHAR</b><small>VENEZUELA</small></div>
+<button class="ico" data-r="carrito" aria-label="Carrito">🛍 <span id="cc">0</span></button></header>
+<main id="app"></main>
+<footer><div class="logo"><b>SAHAR</b><small>VENEZUELA</small></div><p id="foot"></p><p><a data-r="admin" style="cursor:pointer">Administración</a></p></footer>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script src="config.js"></script>
+<script>
+const $=s=>document.querySelector(s),E=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+let P=[],S={},cart=[],sb=null,admin=false,dbState='loading';
+try{cart=JSON.parse(localStorage.getItem('sv_cart')||'[]')}catch(e){}
+const saveCart=()=>{try{localStorage.setItem('sv_cart',JSON.stringify(cart))}catch(e){}$('#cc').textContent=cart.reduce((a,c)=>a+c.q,0)};
+const money=n=>'$'+Number(n).toFixed(2);
+const price=p=>{const s=Number(p.sale);return s>0&&s<p.price?s:Number(p.price)};
+const pct=p=>price(p)<p.price?Math.round(100-price(p)/p.price*100):0;
+const pimg=p=>p.img?`<img src="${E(p.img)}" alt="${E(p.name)} ${E(p.brand)}" loading="lazy">`:'<span>Sin foto</span>';
+const cardH=p=>`<div class="card" data-r="p/${E(p.id)}"><div class="im">${pimg(p)}</div><div class="t"><small>${E(p.brand)}</small><div>${E(p.name)}</div><div>${pct(p)?`<s>${money(p.price)}</s> `:''}<b>${money(price(p))}</b> ${pct(p)?`<span class="off">-${pct(p)}%</span>`:''}</div>${p.stock===false?'<small>Agotado</small>':''}</div></div>`;
+const live=()=>P.filter(p=>p.active!==false);
+function view(){
+ const [r,a]=(location.hash.slice(1)||'').split('/');$('#nav').classList.remove('open');
+ $('#brand').textContent=(S.name||'SAHAR VENEZUELA').split(' ')[0];
+ $('#foot').innerHTML=[S.about,S.hours,S.instagram&&`Instagram: ${E(S.instagram)}`,S.tiktok&&`TikTok: ${E(S.tiktok)}`].filter(Boolean).map(x=>E(x).replace(/&amp;/g,'&')).join('<br>');
+ const A=$('#app');
+ if(r==='admin')return adminView(A);
+ if(r==='carrito')return cartView(A);
+ if(r==='p'){const p=P.find(x=>x.id===a);return p?detail(A,p):A.innerHTML='<div class="msg">Perfume no encontrado.</div>'}
+ if(r==='contacto')return A.innerHTML=`<h2>Contacto</h2><p>${E(S.contact||'Escríbenos por WhatsApp.')}</p><p>${E(S.hours||'')}</p><button class="wa" onclick="wa('Hola, quiero información de SAHAR VENEZUELA.')">WhatsApp</button>`;
+ if(r==='')return home(A);
+ catalog(A,r);
+}
+function empty(){return dbState==='nodb'?'<div class="msg">No se pudo cargar el catálogo.</div>':dbState==='loading'?'<div class="msg">Cargando…</div>':'<div class="msg">Aún no hay perfumes publicados.</div>'}
+function home(A){const L=live(),f=L.filter(p=>p.featured),o=L.filter(p=>pct(p));
+ const sec=(t,l)=>l.length?`<h2>${t}</h2><div class="grid">${l.slice(0,8).map(cardH).join('')}</div>`:'';
+ A.innerHTML=`<div class="hero"><h1>${E(S.title||'LA ESENCIA DE LO EXTRAORDINARIO')}</h1><p>${E(S.subtitle||'Descubre fragancias que reflejan tu personalidad y dejan huella.')}</p><button data-r="catalogo">Explorar colección</button></div>`+(L.length?sec('Destacados',f)+sec('Ofertas especiales',o)+sec('Catálogo',L):empty())}
+function catalog(A,r){let L=live();const g={hombre:'Hombre',mujer:'Mujer',unisex:'Unisex'}[r];
+ A.innerHTML=`<h2>${g||(r==='ofertas'?'Ofertas':'Catálogo')}</h2><div class="bar"><input id="q" placeholder="Buscar nombre o marca"><select id="f"><option value="">Categoría</option><option>Diseñador</option><option>Nicho</option><option>Árabe</option></select><select id="o"><option value="">Ordenar</option><option value="a">Precio ↑</option><option value="d">Precio ↓</option><option value="n">Novedades</option></select></div><div id="g" class="grid"></div>`;
+ const draw=()=>{let l=L.filter(p=>(!g||p.gender===g)&&(r!=='ofertas'||pct(p)));const q=$('#q').value.toLowerCase(),f=$('#f').value,o=$('#o').value;
+  l=l.filter(p=>(p.name+' '+p.brand).toLowerCase().includes(q)&&(!f||p.cat===f));
+  if(o==='a')l.sort((x,y)=>price(x)-price(y));if(o==='d')l.sort((x,y)=>price(y)-price(x));if(o==='n')l.sort((x,y)=>(y.created||0)-(x.created||0));
+  $('#g').innerHTML=l.length?l.map(cardH).join(''):empty()};
+ ['q','f','o'].forEach(i=>$('#'+i).oninput=draw);draw()}
+function detail(A,p){const sz=(p.sizes||'').split(',').map(s=>s.trim()).filter(Boolean);
+ A.innerHTML=`<div class="det"><div class="im">${pimg(p)}</div><div><small>${E(p.brand)}</small><h1>${E(p.name)}</h1><p>${pct(p)?`<s>${money(p.price)}</s> `:''}<b style="font-size:22px">${money(price(p))}</b> ${pct(p)?`<span class="off">-${pct(p)}%</span>`:''}</p><p>${E(p.desc)}</p>
+ <p><small>${[p.gender,p.family,p.conc].filter(Boolean).map(E).join(' · ')}</small></p>
+ ${sz.length?`<select id="sz">${sz.map(s=>`<option>${E(s)}</option>`).join('')}</select>`:''}<input id="qt" type="number" min="1" value="1" style="margin:8px 0">
+ <div class="row"><button id="add" ${p.stock===false?'disabled':''}>${p.stock===false?'Agotado':'Añadir al carrito'}</button><button class="ghost" id="bw">Comprar por WhatsApp</button></div></div></div>
+ <h2>Notas olfativas</h2>${p.top||p.heart||p.base?`<div class="notes"><div><b>Salida</b>${E(p.top)||'—'}</div><div><b>Corazón</b>${E(p.heart)||'—'}</div><div><b>Fondo</b>${E(p.base)||'—'}</div></div>`:'<p class="msg">Notas no disponibles todavía.</p>'}`;
+ const it=()=>({id:p.id,s:$('#sz')?.value||'',q:Math.max(1,+$('#qt').value||1)});
+ $('#add').onclick=()=>{const i=it(),x=cart.find(c=>c.id===i.id&&c.s===i.s);x?x.q+=i.q:cart.push(i);saveCart();location.hash='carrito'};
+ $('#bw').onclick=()=>{const i=it();wa(order([i]))}}
+function lines(items){let t=0;const l=items.map(c=>{const p=P.find(x=>x.id===c.id);if(!p)return null;const u=price(p);t+=u*c.q;return{p,c,u,txt:`- ${p.name} (${p.brand}) ${c.s} x${c.q} · ${money(u)}${pct(p)?` (-${pct(p)}%)`:''}`}}).filter(Boolean);return{l,t}}
+function order(items,name){const{l,t}=lines(items);return `Hola, quiero realizar el siguiente pedido en SAHAR VENEZUELA${name?` (${name})`:''}:\n\n${l.map(x=>x.txt).join('\n')}\n\nTotal: ${money(t)}\n\nQuisiera información para completar mi compra.`}
+function wa(m){const n=(S.whatsapp||'').replace(/\D/g,'');if(!n)return alert('El número de WhatsApp aún no está configurado.');open(`https://wa.me/${n}?text=${encodeURIComponent(m)}`,'_blank')}
+function cartView(A){const{l,t}=lines(cart);
+ A.innerHTML=`<h2>Carrito</h2>`+(l.length?`<table>${l.map((x,i)=>`<tr><td>${E(x.p.name)}<br><small>${E(x.c.s)}</small></td><td><input type="number" min="1" value="${x.c.q}" data-i="${i}" style="width:70px"></td><td>${money(x.u*x.c.q)}</td><td><button class="ico" data-d="${i}">✕</button></td></tr>`).join('')}</table><p class="row"><b>Total</b><b>${money(t)}</b></p><input id="nm" placeholder="Tu nombre (opcional)"><div class="row" style="margin-top:10px"><button class="ghost" data-r="catalogo">Seguir comprando</button><button class="ghost" id="cl">Vaciar</button><button class="wa" id="ck">Pedir por WhatsApp</button></div><p><small>Abrir WhatsApp no confirma el pedido; lo confirmaremos contigo por ese chat.</small></p>`:'<div class="msg">Tu carrito está vacío.</div>');
+ A.querySelectorAll('[data-i]').forEach(e=>e.onchange=()=>{cart[+e.dataset.i].q=Math.max(1,+e.value||1);saveCart();view()});
+ A.querySelectorAll('[data-d]').forEach(e=>e.onclick=()=>{cart.splice(+e.dataset.d,1);saveCart();view()});
+ if($('#cl'))$('#cl').onclick=()=>{cart=[];saveCart();view()};if($('#ck'))$('#ck').onclick=()=>wa(order(cart,$('#nm').value))}
+/* ---------- ADMIN ---------- */
+let editing=null,tab='p';
+function adminView(A){
+ if(!admin)return A.innerHTML=`<h2>Administración</h2><div class="form"><input id="lm" type="email" placeholder="Correo" autocomplete="username"><input id="lp" type="password" placeholder="Contraseña" autocomplete="current-password"><button id="li">Entrar</button></div>`,$('#li').onclick=async()=>{const{error}=await sb.auth.signInWithPassword({email:$('#lm').value,password:$('#lp').value});if(error)return alert(error.message);await chk();view()};
+ const m=n=>$('#'+n).value;
+ A.innerHTML=`<h2>Administración</h2><div class="tabs"><button class="${tab==='p'?'':'ghost'}" data-t="p">Productos</button><button class="${tab==='s'?'':'ghost'}" data-t="s">Tienda</button><button class="ghost" id="lo">Salir</button></div><div id="ad"></div>`;
+ A.querySelectorAll('[data-t]').forEach(b=>b.onclick=()=>{tab=b.dataset.t;view()});$('#lo').onclick=async()=>{await sb.auth.signOut();admin=false;view()};
+ const ad=$('#ad');
+ if(tab==='s'){const f=[['name','Nombre comercial'],['whatsapp','WhatsApp (formato internacional, ej. 58412…)'],['title','Título del banner'],['subtitle','Subtítulo'],['instagram','Instagram'],['tiktok','TikTok'],['contact','Contacto'],['hours','Horarios'],['about','Sobre nosotros']];
+  ad.innerHTML=`<div class="form">${f.map(([k,l])=>`<label>${l}<input id="s_${k}" value="${E(S[k]||'')}"></label>`).join('')}<button id="ss">Guardar</button></div>`;
+  $('#ss').onclick=async()=>{const d={};f.forEach(([k])=>d[k]=m('s_'+k).trim());d.whatsapp=d.whatsapp.replace(/\D/g,'');const{error}=await sb.from('settings').upsert({id:'main',data:d});if(error)return alert(error.message);S=d;view();alert('Guardado')};return}
+ const e=editing,F=[['name','Nombre'],['brand','Marca'],['price','Precio'],['sale','Precio promocional (opcional)'],['sizes','Tamaños (separados por coma)'],['conc','Concentración'],['family','Familia olfativa'],['top','Notas de salida'],['heart','Notas de corazón'],['base','Notas de fondo']];
+ ad.innerHTML=e?`<div class="form"><b>${e.id?'Editar':'Nuevo'} perfume</b>${F.map(([k,l])=>`<label>${l}<input id="e_${k}" value="${E(e[k]||'')}"></label>`).join('')}
+ <label>Género<select id="e_gender">${['Hombre','Mujer','Unisex'].map(x=>`<option ${e.gender===x?'selected':''}>${x}</option>`).join('')}</select></label>
+ <label>Categoría<select id="e_cat">${['Diseñador','Nicho','Árabe'].map(x=>`<option ${e.cat===x?'selected':''}>${x}</option>`).join('')}</select></label>
+ <label>Descripción<textarea id="e_desc">${E(e.desc||'')}</textarea></label>
+ <label>Foto <input type="file" id="e_file" accept="image/*"></label>${e.img?`<img src="${E(e.img)}" width="80" alt="">`:''}
+ <label><input type="checkbox" id="e_featured" ${e.featured?'checked':''} style="width:auto;min-height:0"> Destacado</label>
+ <label><input type="checkbox" id="e_stock" ${e.stock!==false?'checked':''} style="width:auto;min-height:0"> Disponible</label>
+ <label><input type="checkbox" id="e_active" ${e.active!==false?'checked':''} style="width:auto;min-height:0"> Publicado</label>
+ <div class="row"><button class="ghost" id="ec">Cancelar</button><button id="es">Guardar</button></div></div>`
+ :`<button id="nw">+ Nuevo perfume</button><table><tr><th>Perfume</th><th>Precio</th><th></th></tr>${P.map(p=>`<tr><td>${E(p.name)}<br><small>${E(p.brand)}${p.active===false?' · oculto':''}</small></td><td>${pct(p)?`<s>${money(p.price)}</s><br>`:''}${money(price(p))}</td><td><button class="ghost" data-e="${E(p.id)}">Editar</button> <button class="ico" data-x="${E(p.id)}">🗑</button></td></tr>`).join('')}</table>`+(P.length?'':'<div class="msg">Todavía no hay perfumes. Crea el primero.</div>');
+ if(!e){$('#nw').onclick=()=>{editing={};view()};
+  ad.querySelectorAll('[data-e]').forEach(b=>b.onclick=()=>{editing=P.find(p=>p.id===b.dataset.e);view()});
+  ad.querySelectorAll('[data-x]').forEach(b=>b.onclick=async()=>{if(confirm('¿Eliminar este perfume?')){await sb.from('products').delete().eq('id',b.dataset.x);await load()}})}
+ else{$('#ec').onclick=()=>{editing=null;view()};
+  $('#es').onclick=async()=>{try{const d={};F.forEach(([k])=>d[k]=m('e_'+k).trim());
+   d.price=+d.price;if(!(d.price>0))return alert('Precio inválido');d.sale=d.sale?+d.sale:0;if(d.sale<0||d.sale>=d.price)d.sale=0;
+   if(!d.name)return alert('Falta el nombre');
+   d.gender=m('e_gender');d.cat=m('e_cat');d.desc=m('e_desc');['featured','stock','active'].forEach(k=>d[k]=$('#e_'+k).checked);
+   d.img=e.img||'';const fl=$('#e_file').files[0];if(fl){const path=Date.now()+'-'+fl.name.replace(/[^\w.]/g,'_');const u=await sb.storage.from('products').upload(path,fl);if(u.error)throw u.error;d.img=sb.storage.from('products').getPublicUrl(path).data.publicUrl}
+   d.created=e.created||Date.now();const id=e.id||'p'+Date.now();const row={...d,id,descr:d.desc};delete row.desc;const{error}=await sb.from('products').upsert(row);if(error)throw error;await load();editing=null;view()}catch(x){alert('Error: '+(x.message||x))}}}
+}
+/* ---------- INIT ---------- */
+document.addEventListener('click',e=>{const t=e.target.closest('[data-r]');if(t){location.hash=t.dataset.r;scrollTo(0,0)}});
+$('#mb').onclick=()=>$('#nav').classList.toggle('open');
+addEventListener('hashchange',view);saveCart();view();
+async function load(){const[a,b]=await Promise.all([sb.from('products').select('*').order('created',{ascending:false}),sb.from('settings').select('data').eq('id','main').maybeSingle()]);
+ P=(a.data||[]).map(p=>({...p,desc:p.descr,price:+p.price,sale:+p.sale||0}));S=b.data?.data||{};dbState=a.error?'nodb':'ready';view()}
+async function chk(){admin=false;const{data:{session}}=await sb.auth.getSession();if(session){const r=await sb.from('admins').select('user_id').eq('user_id',session.user.id).maybeSingle();admin=!!r.data}}
+(async()=>{try{sb=supabase.createClient(CONFIG.url,CONFIG.key);await chk();await load()}catch(e){dbState='nodb';view()}})();
+</script></body></html>
